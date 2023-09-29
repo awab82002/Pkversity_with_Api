@@ -1,0 +1,362 @@
+﻿@page "/search"
+@using ClassLibraryDAL
+@using ClassLibraryEntities
+@inject IJSRuntime js
+
+@using User.Authentication
+@inject AuthenticationStateProvider authStateProvider
+@inject NavigationManager nm
+
+
+
+<style>
+    .label {
+        color: #0D6EFD;
+    }
+
+    .btn {
+        border-radius: 0;
+    }
+
+    .form-select {
+        border-radius: 0;
+    }
+
+    .filter {
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        padding-top: 1rem;
+        border: none;
+    }
+
+    .row {
+        --bs-gutter-x: 0;
+    }
+
+    .color-d {
+        background-color: #1a1a97c4;
+    }
+
+    .size {
+        font-size: 1.5rem;
+    }
+
+    .font {
+        font-size: 2.5rem;
+    }
+
+    .font1 {
+        font-size: 2.5rem;
+    }
+
+    .leftlabel {
+       
+        font-size: 9px;
+        
+        position: absolute;
+        padding-left: 5px;
+        padding-right: 5px;
+        color: #fff;
+        text-transform: uppercase;
+        right: -2px;
+        top: 17px;
+        font-weight:bold;
+        border-radius:4px;
+    }
+
+    .red {
+        background-color: red !important;
+    }
+
+    .blue {
+        background-color: blue !important;
+    }
+
+</style>
+@if (Loadercheck)
+{
+    <div class="loader"></div>
+}
+else
+{
+    <div style="background-color:white;">
+        <div class="box container">
+            <div class="mx-auto ">
+                <div class="pt-4 filter">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-floating">
+                                <select class="form-select" @onchange="_DegOption" id="floatingSelect" aria-label="Floating label select example">
+                                    <option value="-1" selected>Select Program Degree</option>
+
+                                    @foreach (var emp in @PassingDegreeList)
+                                    {
+                                        <option value="@emp.PassingDegreesId">@emp.Title</option>
+                                    }
+                                </select>
+                                <label for="floatingSelect" class="label">Select Last Program Degree</label>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-floating">
+                                <select class="form-select" @bind="@PassingDegreeSGid" id="floatingSelect" aria-label="Floating label select example">
+                                    <option value="-1" selected>Select Passing Groups</option>
+
+                                    @foreach (var emp in @PassingDSGroupsList)
+                                    {
+                                        if (alpha == emp.PassingDegreeId)
+                                        {
+                                            <option value="@emp.PassingDSGroupsId">@emp.PassingDSGroups</option>
+                                        }
+                                    }
+                                </select>
+                                <label for="floatingSelect" class="label">Select Passing Degree Subject Groups</label>
+                            </div>
+
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-floating">
+                                <select class="form-select" @bind="@perc" id="floatingSelect" aria-label="Floating label select example">
+                                    <option value="-1" selected>Select Percentage</option>
+
+                                    <option value="50">less than 50 %</option>
+                                    <option value="50">50-60 %</option>
+                                    <option value="60">55-60 %</option>
+                                    <option value="60">60-70 %</option>
+                                    <option value="60">80-90 %</option>
+                                    <option value="60">above 90 %</option>
+
+                                </select>
+                                <label for="floatingSelect" class="label">Select Percentage of Last Passing Degree</label>
+                            </div>
+
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-floating">
+                                <select @bind="cityID" class="form-select" id="floatingSelect" aria-label="Floating label select example">
+                                    <option value="-1">Select City</option>
+
+                                    @foreach (var emp in @CitiesList)
+                                    {
+
+                                        <option value="@emp.CityId">@emp.CityName</option>
+
+                                    }
+                                </select>
+                                <label for="floatingSelect" class="label">Preferable City for University </label>
+                            </div>
+
+                        </div>
+                        <div class="col-1 searh-btn">
+                            <button type="submit" style="height: 58px" class="btn btn-primary text-white btn-lg btn-search" @onclick="Submit">Search</button>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            @if (check)
+            {
+                <div class="container-fluid mt-5 ml-4">
+                    <div class="row" style="gap: 2rem;">
+
+                        @foreach (var emp in FilterCitiesList)
+                        {
+                            <div class="col-md-3 mt-4">
+                                <div class="card text-dark bg-light shadow mb-3" style="max-width: 18rem;">
+                                    @if (emp.admission_Open_Close == true)
+                                    {
+                                        <span id="hostlabel2" class="leftlabel blue" style="margin-right :0px; z-index: 10; transform: rotate(30deg); margin-top: 2px;">@Admission_message_open</span>
+                                    }
+                                    else
+                                    {
+                                        <span id="hostlabel2" class="leftlabel red" style="margin-right :0px; z-index: 10; transform: rotate(30deg); margin-top: 2px;">@Admission_message_close</span>
+
+                                    }
+
+                                    <div class="card-body">
+                                        <div class="h4">@emp.Title</div>
+                                        <h6 class="card-subtitle mb-2">You are eligible in <b>@emp.Departments </b> Departments</h6>
+                                        <button class="btn btn-primary mt-2" type="button" @onclick="e=>DepartmentsDetails(emp.InstituteId,emp.Title)" data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight" aria-controls="offcanvasRight">View Details</button>
+
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+            else if (nullcheck)
+            {
+                <h1 style="text-align:center">Sorry! You are not Eligible in any University .</h1>
+                <h6 style="text-align:center">(According to our Database)</h6>
+            }
+
+        </div>
+
+
+    </div>
+}
+<div class="offcanvas offcanvas-end w-100 canvas-color" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
+    <div class="offcanvas-header">
+        <h2 id="offcanvasRightLabel" class="text-black">@Title</h2>
+        <button type="button" class="btn-close text-reset " style="Color:White;" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        @if (check1)
+        {
+            <ViewDetails FilterDepartmentList="FilterDepartmentList"></ViewDetails>
+
+        }
+
+    </div>
+</div>
+
+@if (checck)
+{
+    <MessageComponent CustomMessage="@Message"></MessageComponent>
+}
+
+
+
+
+@code {
+
+
+    public bool Loadercheck { get; set; } = false;
+
+    public bool Data { get; set; } = false;
+    public string? value1 { get; set; }
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticatestate { get; set; }
+    public bool isloading { get; set; } = false;
+    private List<EntPassingDegree>? PassingDegreeList;
+    private List<EntPassingDSGroups>? PassingDSGroupsList;
+    private List<EntCities>? CitiesList;
+
+
+    public List<EntFilter>? FilterCitiesList { get; set; }
+
+    private List<EntProgramDegreeDetails>? FilterDepartmentList { get; set; }
+
+    public string? Title { get; set; }
+
+    public string? alpha { get; set; }
+
+    public string? PassingDegreeSGid { get; set; }
+
+    public string? cityID { get; set; }
+
+    public bool check = false;
+
+    public bool check1 = false;
+    public bool nullcheck = false;
+
+    public bool checck = false;
+
+    public string? perc { get; set; }
+
+    public string? Message { get; set; }
+
+    public string? Admission_message_open { get; set; }
+    public string? Admission_message_close { get; set; }
+
+    public string? testing { get; set; }
+    
+    private EntFilter? _ModelFilter { get; set; } = new EntFilter();
+
+
+    private void LoadProgramDetails()
+    {
+
+        this.PassingDegreeList = DALPassingDegree.GetPassingDegrees();
+        this.PassingDSGroupsList = DALPassingDSGroups.GetPassingDSGroups();
+        this.CitiesList = DalCities.GetCities();
+    }
+    protected override void OnInitialized()
+    {
+
+
+        LoadProgramDetails();
+
+
+        Loadercheck = true;
+
+        LoadProgramDetails();
+        Loadercheck = false;
+
+    }
+
+    private void _DegOption(ChangeEventArgs e)
+    {
+        alpha = e.Value as string;
+
+    }
+
+
+    public void Submit()
+    {
+        Data = true;
+
+
+        if (PassingDegreeSGid != "-1" && !string.IsNullOrEmpty(PassingDegreeSGid as string) || cityID != "-1" && !string.IsNullOrEmpty(cityID as string) || perc != "-1" && !string.IsNullOrEmpty(perc as string))
+        {
+            FilterCitiesList = DalFilter.GetDepartmentsbyID(PassingDegreeSGid, cityID, perc);
+            Admission_message_open = "Admission Open";
+            Admission_message_close = "Admission Close";
+            if (FilterCitiesList.Count != 0)
+            {
+                nullcheck = false;
+                check = true;
+                nullcheck = false;
+            }
+            else
+            {
+                check = false;
+                nullcheck = true;
+                check = false;
+            }
+
+        }
+        else
+        {
+            Alert();
+
+        }
+
+    }
+    private async Task Alert()
+    {
+        await js.InvokeVoidAsync("alert", "Please select all values");
+    }
+
+
+    private void DepartmentsDetails(string iid, string title)
+    {
+
+        DisplayGreeting();
+        if (value1 != null && value1 != "")
+        {
+
+
+            Title = title;
+            FilterDepartmentList = DalFilter.GetDepartmentDetailsbyID(PassingDegreeSGid.ToString(), iid);
+            check1 = true;
+        }
+        else
+        {
+            nm.NavigateTo("/login");
+
+        }
+
+    }
+
+
+    private async Task DisplayGreeting()
+    {
+        var authState = await authenticatestate;
+        value1 = $"{authState.User.Identity.Name}";
+
+    }
+
+}

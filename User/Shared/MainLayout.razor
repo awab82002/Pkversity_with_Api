@@ -1,0 +1,117 @@
+﻿@using User.Authentication
+@inherits LayoutComponentBase
+@inject AuthenticationStateProvider authStateProvider
+@inject NavigationManager nm
+
+
+<PageTitle>FrontPage</PageTitle>
+<style>
+    .img-height {
+        height: 1rem;
+        margin-bottom: 0rem;
+    }
+
+    .nav-color {
+        background-color: white;
+        color: black;
+    }
+
+    .btn-green {
+        background-color: #40DE21;
+    }
+
+    .footer-anchor {
+        text-decoration: none
+    }
+</style>
+
+<main>
+    <nav class="navbar navbar-expand-sm sticky-top nav-color shadow-sm">
+        <div class="container-fluid position-relative" style="background-color:white;">
+            <a class="navbar-brand" href="/" b-23ai3ihtzc="">
+                <img src="Images/pkversity_logo_new.png" height="40">
+
+            </a>
+
+
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <AuthorizeView Roles="User">
+                        <Authorized>
+                            <li class="nav-item">
+                                <a class="nav-link text-black" aria-current="page" href="/">Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-black" href="personalinfo">Personal Info</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-black" href="academicinfo">Academic Info</a>
+                            </li>
+                        </Authorized>
+
+                    </AuthorizeView>
+                </ul>
+                <AuthorizeView>
+                    <Authorized>
+                        <a @onclick="logout" href="javascript:void(0)" class="btn btn-primary">Logout</a>
+                    </Authorized>
+                    <NotAuthorized>
+                        <form class="form-inline my-2 my-lg-0">
+
+                            <a href="login" class="btn  btn-primary">Login</a>
+                            <a href="register" class="btn  btn-primary">Register</a>
+                        </form>
+
+                    </NotAuthorized>
+                </AuthorizeView>
+            </div>
+        </div>
+    </nav>
+    <div>
+        @Body
+    </div>
+    <section class=" footer border-top  mt-1 ">
+        <!--!--><!--!--><style>
+                            .nav-link {
+                                display: inline-block !important;
+                                padding: 0 5px 0 5px;
+                            }
+        </style>
+        <!--!--><div class="container  pt-3">
+            <div class="row">
+                <div class="col-md-2 text-center">
+                    @*<img src="/images/img.png" height="40">*@
+
+                    <p class="text-secondary small">
+                        ©2022 pkversity
+
+                    </p>
+                </div>
+                <div class="col-md-8 text-center text-secondary">
+                    <a href="aboutus" class="nav-link">About Us</a>
+                    <a href="#" class="nav-link">Contact Us</a>
+                    <a href="#" class="nav-link">Privacy Policy</a>
+                    <a href="#" class="nav-link">FAQ</a>
+                    <a href="#" class="nav-link">Partners</a>
+
+                    <p class="small">Powerd by: ASEYEM (Institute of Research and Guidance), Islamabad Pakistan</p>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+@code {
+
+    private async Task logout()
+    {
+        var customAuthStateProvider = (CustomAuthenticationStateProvider)authStateProvider;
+        await customAuthStateProvider.UpdateAuthenticationState(null);
+        nm.NavigateTo("/", true);
+    }
+}
+
